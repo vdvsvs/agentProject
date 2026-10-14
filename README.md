@@ -1,45 +1,60 @@
-# 企业知识库 Agent | 可复现演示
+# 企业知识库问答
 
-这是求职展示用的只读知识库项目。默认使用 `sample_docs/` 中的虚构企业制度，不读取 Wang 的私人笔记。模型可自行调用 `search` 和 `read` 两个工具；没有模型凭据时仍可演示证据检索并运行全部离线测试。
+只读、本地运行的知识库问答工作台。默认使用 `sample_docs/` 中的虚构企业制度；打开网页即可搜索文档、查看原文与来源。配置模型后，可显式授权将问题及工具读取的片段发送给模型服务商并生成回答。模型回答仍需人工核对引用。
 
-项目目标与当前状态见 [项目背景与现状](PROJECT_CONTEXT.md)，项目改动见 [变更记录](CHANGELOG.md)，各文件的功能分工见 [代码功能索引](CODE_MAP.md)，开发约定见 [AGENTS.md](AGENTS.md)。
+项目目标与进度见 [项目背景与现状](PROJECT_CONTEXT.md)；改动见 [变更记录](CHANGELOG.md)，代码分工见 [代码功能索引](CODE_MAP.md)。
 
-## 启动
+## 本地启动
 
 需要 Python 3.11+。在本目录运行：
 
 ```powershell
 python -m pip install -r requirements.txt
-python demo_agent.py --question "忘记密码怎么重置"
-python eval_demo.py
-python test_demo_agent.py
-python test_knowledge_agent.py
+python web_server.py
 ```
 
-可通过 `--docs "路径"` 明确选择其他 Markdown 文档目录，工具只会读取该目录下的 `.md` 文件。`--question` 省略时会交互式提问。离线模式输出排名、文件名、片段编号和预览；它展示证据，不声称已生成答案。
+浏览器打开 `http://127.0.0.1:8000`。服务只监听本机；关闭终端服务即停止。检索、原文预览和无答案提示无需模型密钥。服务启动时加载指定目录下的 Markdown；文档更新后重启服务即可刷新。可用 `python web_server.py --docs "路径" --port 8001` 选择另一组文档和端口。向其他人演示时优先使用虚构样例；本服务没有用户身份认证，不应直接暴露到公网。
 
-## 模型驱动工具调用
+## 模型回答
 
-首次配置时运行 `python configure_credential.py`，密钥存入当前 Windows 用户的 Credential Manager；模型地址和名称保存在 `model_config.json`。不要提交密钥或私人文档。
-
-```powershell
-python demo_agent.py --question "忘记密码怎么重置" --agent --allow-remote
-```
-
-`--agent` 必须同时指定 `--allow-remote`，因为工具返回的文档片段会发送给配置的模型服务商。对私人资料使用 `--docs` 前先确认服务商的数据政策；样例数据无需使用私有 Vault。若没有配置凭据，请使用上面的离线模式。
+Windows 本机运行 `python configure_credential.py`，将 API Key 存入当前用户的 Credential Manager；`model_config.json` 只保存模型、服务地址和凭据名称。配置完成后刷新网页，选择“模型回答”并勾选远端发送许可。没有密钥时仍可使用本地检索。模型服务调用有 30 秒超时；实际用量与费用以服务商为准。
 
 ```text
-问题 -> 模型选择 search -> 本地检索片段
-     -> 模型选择 read   -> 本地核实来源
-     -> 带来源回答 / 依据不足 / 达到轮次上限
+问题 -> 模型调用 search -> 本地检索片段
+     -> 模型调用 read   -> 本地核实来源
+     -> 模型回答 / 依据不足 / 达到轮次上限
 ```
 
-`read` 只能按检索所得的路径与片段编号读取已加载内容，不能接受任意文件路径。工具调用最多 5 轮，文档中的命令被视为数据。代码中的提示词不是可靠的安全隔离，仍需人工核对回答是否被引用片段支持。
+授权只作用于当前请求。仅有搜索命中的元数据和读取到的片段会交给模型；模型引用仍可能不充分，应点击来源核对原文。网页展示的来源仅包含本次模型实际读取成功的片段。文档文本视为不可信数据，提示词不构成绝对的安全隔离；使用私人资料前先确认服务商的数据政策。
+
+## Docker
+
+在有 Docker 的机器上：
+
+```powershell
+docker build -t knowledge-workspace .
+docker run --rm -p 127.0.0.1:8000:8000 knowledge-workspace
+```
+
+容器默认只含虚构样例。若要指定自己的文档，运行时将目录以只读方式挂载到 `/docs`，并在命令末尾使用 `python web_server.py --host 0.0.0.0 --docs /docs`；确保挂载路径只含准备给本地界面和所选模型查看的资料。容器中的模型凭据通过 `KNOWLEDGE_AGENT_API_KEY` 环境变量提供，切勿把密钥写进镜像、命令历史或提交到 Git；不提供密钥时可离线使用。
+
+## 命令行与验证
+
+原有命令行演示仍可使用：
+
+```powershell
+python demo_agent.py --question "忘记密码怎么重置"
+python demo_agent.py --question "忘记密码怎么重置" --agent --allow-remote
+python test_demo_agent.py
+python test_knowledge_agent.py
+python test_web_server.py
+python eval_demo.py
+```
 
 ## 评测与边界
 
-运行 `eval_demo.py` 会输出固定的 12 道有答案题及 3 道无答案题的逐题结果。指标定义：Top-3 来源命中数 / 12；无答案误匹配数 / 3。这个小样例只验证检索基线，不代表模型回答准确率、真实业务召回率或生产安全性。`test_demo_agent.py` 使用模拟模型验证工具调用、非法路径、无来源和轮次上限，**不代表真实 API 已在本版本测试通过**。
+`eval_demo.py` 包含 12 道有答案题、3 道无答案题，指标是 Top-3 来源命中数 / 12 和无答案误匹配数 / 3。样例文档与问题集同时设计，该结果不代表回答准确率、真实业务召回率或生产安全性。离线测试使用模拟模型，**不证明真实 API 在当前环境可用**；`test_knowledge_agent.py` 依赖本机早期 Vault 目录，换机器时不属于可复现验收。
 
-2026-10-14 本机实测：Top-3 来源命中 12/12，无答案误匹配 0/3；新旧两组离线测试均通过。样例文档与问题集同时设计，数字不能推广到真实企业文档。
+2026-10-14 本机样例评测：Top-3 来源命中 12/12，无答案误匹配 0/3。当前检索使用中文双字片段和关键词匹配，遇到同义词可能漏检。向量检索、混合检索、MCP 与 LangGraph 均未实现；引入新组件前先用真实问题记录失败案例。
 
-现阶段采用中文双字片段匹配，不使用向量库、LangGraph、MCP 或 Docker。文本表达差异很大时可能漏检；面试时应展示失败案例，再决定是否引入更复杂的检索方法。已有 `knowledge_agent.py` 是早期本地 Vault 练习入口，默认绑定本机目录，不用于项目复现演示。
+`knowledge_agent.py` 末尾保留早期本机 Vault 练习入口，不用于网页产品和他人复现演示。

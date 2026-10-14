@@ -1,0 +1,10 @@
+*
+!requirements.txt
+!demo_agent.py
+!knowledge_agent.py
+!model_config.json
+!web_server.py
+!web/
+!web/**
+!sample_docs/
+!sample_docs/**

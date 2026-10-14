@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>知识库问答</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23086d70'/%3E%3Ctext x='32' y='44' font-size='39' fill='white' text-anchor='middle'%3E%E7%9F%A5%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/app.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="identity">
+        <span class="logo" aria-hidden="true">知</span>
+        <div><strong>知识库问答</strong><small id="library-name">正在连接本地知识库</small></div>
+      </div>
+      <div class="connection" id="connection" role="status"><span class="dot"></span>连接中</div>
+    </header>
+
+    <div class="workspace">
+      <aside class="library" aria-labelledby="library-title">
+        <div class="pane-heading">
+          <div><span class="eyebrow">LIBRARY</span><h2 id="library-title">文档库</h2></div>
+          <span class="counter" id="document-count">—</span>
+        </div>
+        <div class="library-stats" id="library-stats">正在载入文档…</div>
+        <ul class="document-list" id="document-list" aria-label="知识库文档"></ul>
+        <div class="library-foot"><span class="dot"></span>本地只读 · 不修改文档</div>
+      </aside>
+
+      <main class="main">
+        <div class="main-inner">
+          <div class="intro">
+            <span class="eyebrow">KNOWLEDGE WORKSPACE</span>
+            <h1>知识库问答</h1>
+          </div>
+
+          <section class="composer" aria-labelledby="question-title">
+            <div class="composer-heading"><h2 id="question-title">你的问题</h2><span id="question-hint">检索模式仅在本地查找证据</span></div>
+            <form id="ask-form">
+              <label class="sr-only" for="question">输入问题</label>
+              <textarea id="question" rows="3" maxlength="2000" placeholder="例如：忘记密码后如何重置？" required></textarea>
+              <div class="composer-actions">
+                <fieldset class="mode-control" aria-label="问答模式">
+                  <legend class="sr-only">问答模式</legend>
+                  <label><input type="radio" name="mode" value="search" checked><span>检索证据</span></label>
+                  <label id="answer-option"><input type="radio" name="mode" value="answer"><span>模型回答</span></label>
+                </fieldset>
+                <button class="submit" id="submit" type="submit">开始检索 <span aria-hidden="true">↗</span></button>
+              </div>
+              <label class="permission" id="permission-wrap" hidden><input type="checkbox" id="allow-remote"><span>我同意将问题和相关文档片段发送给已配置的模型服务商</span></label>
+              <p class="form-message" id="form-message" role="alert" hidden></p>
+            </form>
+          </section>
+
+          <section class="results" aria-labelledby="result-title">
+            <div class="section-heading">
+              <div><span class="eyebrow">RESPONSE</span><h2 id="result-title">检索结果</h2></div>
+              <span class="result-tag" id="result-tag">等待提问</span>
+            </div>
+            <div class="answer" id="answer" aria-live="polite">
+              <div class="empty-mark" aria-hidden="true">⌕</div>
+              <h3>等待提问</h3>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <aside class="evidence" aria-labelledby="source-title">
+        <div class="pane-heading">
+          <div><span class="eyebrow">REFERENCES</span><h2 id="source-title">来源</h2></div>
+          <span class="counter" id="source-count">0</span>
+        </div>
+        <div id="source-list" class="source-list"><p class="aside-empty">暂无来源</p></div>
+        <div class="evidence-foot">引用内容请以原始文档为准</div>
+      </aside>
+    </div>
+  </div>
+
+  <dialog id="document-dialog" aria-labelledby="document-title">
+    <div class="dialog-head">
+      <div><span class="eyebrow">DOCUMENT VIEWER</span><h2 id="document-title"></h2></div>
+      <button class="icon-button" type="button" id="close-dialog" aria-label="关闭文档预览" title="关闭文档预览">×</button>
+    </div>
+    <p class="dialog-meta" id="document-meta"></p>
+    <div class="document-content" id="document-content"></div>
+  </dialog>
+</body>
+</html>
