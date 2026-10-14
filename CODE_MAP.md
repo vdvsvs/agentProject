@@ -12,6 +12,6 @@
 | 演示离线测试 | `test_demo_agent.py` | 用模拟模型检查检索、工具参数、来源、路径限制和轮次上限；无需真实 API。 |
 | 早期本地练习及测试 | `evaluate_search.py`、`test_knowledge_agent.py` | 使用 `knowledge_agent.py` 的本机 Vault 目录，依赖当地文件，不能当作独立环境可复现的演示测试。 |
 | 项目说明与依赖 | `README.md`、`requirements.txt` | 启动方式、使用边界和 Python 依赖。 |
-| 协作与历史 | `AGENTS.md`、`CHANGELOG.md`、`CODE_MAP.md`、`.gitignore` | Agent 工作约定、变更记录、功能索引和提交排除规则。 |
+| 背景、协作与历史 | `PROJECT_CONTEXT.md`、`AGENTS.md`、`CHANGELOG.md`、`CODE_MAP.md`、`.gitignore` | 项目目标与现状、Agent 工作约定、变更记录、功能索引和提交排除规则。 |
 
 主流程：`demo_agent.py` 加载文档并调用 `knowledge_agent.py` 切分和检索；离线模式展示片段，模型模式先 `search` 后按编号 `read`，再输出有来源的回答。

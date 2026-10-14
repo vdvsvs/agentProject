@@ -6,3 +6,4 @@
 
 - 初始化项目并加入 `AGENTS.md`（`f2f91e5`）：纳入只读知识库演示、虚构样例文档、离线测试与开发约定；添加 `.gitignore` 排除缓存和 `.env` 文件。验证：`python test_demo_agent.py`、`python test_knowledge_agent.py` 均通过。
 - 增加项目文档（本次提交）：新增本记录和 `CODE_MAP.md`，在 `README.md` 提供入口，并要求以后每次提交同步维护记录及功能索引。验证：核对文件职责与 Git 历史，运行两项离线测试。
+- 整理知识库中的项目背景（本次提交）：新增 `PROJECT_CONTEXT.md`，区分学习计划、当前代码与尚未验收的目标；在 `README.md` 和 `CODE_MAP.md` 增加入口。验证：核对三份相关笔记与仓库代码，两项离线测试通过，样例评测为 12/12、0/3。
